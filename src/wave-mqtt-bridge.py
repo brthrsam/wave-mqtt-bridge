@@ -159,7 +159,7 @@ while True:
     # User Wave Plus
     if aw_type == "WAVEPLUS": 
         try:
-            wp = waveplus.WavePlus(SerialNumber)
+            wp = waveplus.WavePlus(int(aw_serial))
                 
             wp.connect()
             
