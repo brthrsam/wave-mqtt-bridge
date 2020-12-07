@@ -46,7 +46,7 @@ mqtt_topic_v = os.getenv('MQTT_TOPIC_VOC')
 aw_serial = os.getenv('AW_SERIAL')
 aw_type = os.getenv('AW_TYPE')
 wavemon_logfile = os.getenv('WM_LOGFILE')
-wavemon_interval_s = os.getenv('VM_INTERVAL_S')
+wavemon_interval_s = os.getenv('WM_INTERVAL_S')
 
 # Set up logging
 if wavemon_logfile != "None":
@@ -61,17 +61,17 @@ logging.info("Config: WM_INTERVAL_S resolved to %s", wavemon_interval_s)
 
 # Check environment variables
 if wavemon_interval_s == None:
-    logging.info("AW_INTERVAL_S defaulted to 300s (5m)");
+    logging.info("WM_INTERVAL_S defaulted to 300s (5m)");
     wavemon_interval_s = "300"
 
 if wavemon_interval_s.isdigit() is not True:
-    logging.info("AW_INTERVAL_S must be numerical");
+    logging.info("WM_INTERVAL_S must be numerical");
     sys.exit(1)
 else:
     wavemon_interval_s = int(wavemon_interval_s)
 
 if wavemon_interval_s < 30:
-    logging.info("AW_INTERVAL_S cannot be lower than 30s");
+    logging.info("WM_INTERVAL_S cannot be lower than 30s");
     sys.exit(1)
 
 if aw_serial == None:
@@ -89,6 +89,10 @@ if aw_serial.isdigit() is not True or len(aw_serial) != 10:
 if aw_type != "WAVE" and aw_type != "WAVEPLUS":
     logging.error("AW_TYPE defaulting to WAVE")
     aw_TYPE = "WAVE"
+
+# Log wave
+logging.info("Config: AW_SERIAL resolved to %s", aw_serial)
+logging.info("Config: AW_TYPE resolved to %s", aw_type)
 
 if mqtt_host != None:
     logging.info("MQTT publishing enabled")
@@ -159,8 +163,7 @@ while True:
     # User Wave Plus
     if aw_type == "WAVEPLUS": 
         try:
-            wp = waveplus.WavePlus(aw_serial)
-                
+            wp = waveplus.WavePlus(int(aw_serial))
             wp.connect()
             
             # read values
@@ -178,7 +181,6 @@ while True:
             
             # Print data
             if mqtt_host != None:
-                publish_mqtt(radon_st_avg,radon_lt_avg,temperature,humidity,pressure,CO2_lvl,VOC_lvl)
                 publish_mqtt(radon_st_avg,radon_lt_avg,temperature,humidity,pressure,CO2_lvl,VOC_lvl)
 
         except Exception as ex:
@@ -199,4 +201,3 @@ while True:
 
     logging.info('Round done, sleeping %fs until next interval.', sleep_s) 
     time.sleep( sleep_s )
-
